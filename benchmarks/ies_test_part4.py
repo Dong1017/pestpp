@@ -2693,7 +2693,7 @@ def tenpar_mean_iter_test_sched():
     print(phidf2.loc[:,"mean"])
     print(phidf2.shape)
     assert phidf2.shape[0] == 25 #hard coded to noptmax above
-    assert phidf2.shape[1] == 45 #restart with 40 reals + summary stats
+    assert phidf2.shape[1] == 43 #restart with 40 reals + summary stats
     
     pst.pestpp_options.pop("save_dense")
 
@@ -2704,7 +2704,7 @@ def tenpar_mean_iter_test_sched():
     print(phidf2.loc[:,"mean"])
     print(phidf2.shape)
     assert phidf2.shape[0] == 25 #hard coded to noptmax above
-    assert phidf2.shape[1] == 45 #restart with 40 reals + summary stats
+    assert phidf2.shape[1] == 43 #restart with 40 reals + summary stats
     
 
 
@@ -4606,14 +4606,14 @@ def freyberg_relaxation_invest():
     
 
 if __name__ == "__main__":
-    #tenpar_mean_iter_test_sched()
+    tenpar_mean_iter_test_sched()
     #tenpar_uniformdist_invest()
     #temp_plot()
     #freyberg_regfac_invest()
     #freyberg_relaxation_invest()
     #tenpar_relaxation_invest()
     #tenpar_reg_factor_test()
-    tenpar_high_phi_test()
+    #tenpar_high_phi_test()
     #tenpar_iqr_bad_phi_sigma_test()
     #multimodal_test()
     #plot_mm1_sweep_results()
