@@ -4601,12 +4601,67 @@ def freyberg_relaxation_invest():
             pdf.savefig()
             plt.close(fig)
 
-    
+
+
+def tenpar_reinflate_num_reals_invest():
+    model_d = "ies_10par_xsec"
+    test_d = os.path.join(model_d, "master_reinflate_num_reals")
+    template_d = os.path.join(model_d, "test_template")
+
+    if not os.path.exists(template_d):
+        raise Exception("template_d {0} not found".format(template_d))
+
+
+    num_reals = 10
+    std = 0.25
+    noptmax = 10
+    dialate_factor = 1.25
+    par_sigma_range = 6
+    obs_bias = 0.0
+
+
+    if os.path.exists(test_d):
+        shutil.rmtree(test_d)
+    shutil.copytree(template_d,test_d)
+    pst_name = os.path.join(test_d, "pest.pst")
+    pst = pyemu.Pst(pst_name)
+    pst.observation_data["weight"] = 1.0
+    pst.observation_data["obsval"] += obs_bias
+    pst.parameter_data["partrans"] = "log"
+    pst.parameter_data["parval1"] = pst.parameter_data["parubnd"]
+    #pst.parameter_data.loc[pst.par_names[::2],"parval1"] = pst.parameter_data.loc[pst.par_names[::2],"parubnd"]
+    pst.parameter_data.loc[pst.par_names,"parval1"] = pst.parameter_data.loc[pst.par_names,"parubnd"]
+    #pst.parameter_data.loc[pst.par_names[1::2],"parval1"] = pst.parameter_data.loc[pst.par_names[1::2],"parlbnd"]
+    pst.control_data.noptmax = noptmax
+    pst.pestpp_options["ies_num_reals"] = num_reals
+    #pst.pestpp_options["ies_multimodal_alpha"] = 0.99
+    pst.pestpp_options["ies_n_iter_reinflate"] = [1,1,999]
+    pst.pestpp_options["ies_reinflate_num_reals"] = [5,10,50]
+    pst.pestpp_options["ies_use_approx"] = False
+    #pst.pestpp_options["ies_use_mda"] = True
+    pst.observation_data["obgnme"] = pst.obs_names
+    pst.parameter_data["pargp"] = pst.par_names
+    pst.observation_data.loc[pst.nnz_obs_names,"weight"] = 1./std
+    pst.observation_data["standard_deviation"] = std
+    draws = np.random.normal(0.0,std,num_reals)
+    vals = pst.observation_data.loc[pst.nnz_obs_names,"obsval"].values
+    obsnoise = np.array([vals for _ in range(num_reals)])
+    for i, d in enumerate(draws):
+        obsnoise[i,:] += d
+    noise = pd.DataFrame(obsnoise,columns=pst.nnz_obs_names)
+    noise.to_csv(os.path.join(test_d,"noise.csv"))
+    pst.pestpp_options["ies_obs_en"] = "noise.csv"
+
+    pst.write(os.path.join(pst_name),version=2)
+    pyemu.os_utils.run("{0} pest.pst".format(exe_path),cwd=test_d)
+    pst = pyemu.Pst(os.path.join(pst_name))
+
 
     
 
 if __name__ == "__main__":
-    tenpar_mean_iter_test_sched()
+    tenpar_reinflate_num_reals_invest()
+    #tenpar_mean_iter_test_sched()
     #tenpar_uniformdist_invest()
     #temp_plot()
     #freyberg_regfac_invest()

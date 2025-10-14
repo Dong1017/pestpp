@@ -7687,10 +7687,12 @@ void EnsembleMethod::reset_par_ensemble_to_prior_mean(double reinflate_factor,in
     message(0,"resetting current parameter ensemble to prior ensemble with current ensemble mean");
     message(1,"reinflation factor:",reinflate_factor);
     performance_log->log_event("getting prior parameter ensemble mean-centered anomalies");
-    real_names = pe_base.get_real_names();
+    vector<string> pebase_real_names = pe_base.get_real_names();
+	vector<string> oebase_real_names = oe_base.get_real_names();
+
     if ((reinflate_num_reals > 0) && (reinflate_num_reals < pe_base.shape().first))
     {
-        vector<string> t;
+        vector<string> tpar,tobs;
         bool has_base = false;
         for (auto& n : real_names)
         {
@@ -7703,20 +7705,24 @@ void EnsembleMethod::reset_par_ensemble_to_prior_mean(double reinflate_factor,in
         bool found_base = false;
         for (int i=0;i<reinflate_num_reals;i++)
         {
-            t.push_back(real_names[i]);
+            tpar.push_back(pebase_real_names[i]);
+        	tobs.push_back(oebase_real_names[i]);
             if (real_names[i] == BASE_REAL_NAME)
             {
                 found_base = true;
             }
         }
+        pebase_real_names = tpar;
+		oebase_real_names = tobs;
         if ((has_base) && (!found_base))
         {
-            real_names[real_names.size() -1] = BASE_REAL_NAME;
+            pebase_real_names[pebase_real_names.size() -1] = BASE_REAL_NAME;
+        	oebase_real_names[oebase_real_names.size() -1] = BASE_REAL_NAME;
         }
 
     }
 
-    Eigen::MatrixXd anoms = pe_base.get_eigen_anomalies(real_names, pe.get_var_names(), pest_scenario.get_pestpp_options().get_ies_center_on());
+    Eigen::MatrixXd anoms = pe_base.get_eigen_anomalies(pebase_real_names, pe.get_var_names(), pest_scenario.get_pestpp_options().get_ies_center_on());
     anoms = anoms * reinflate_factor;
     performance_log->log_event("getting current parameter ensemble mean vector");
     vector<double> mean_vec = pe.get_mean_stl_var_vector();
@@ -7735,7 +7741,7 @@ void EnsembleMethod::reset_par_ensemble_to_prior_mean(double reinflate_factor,in
         anoms.col(i) = anoms.col(i).array() + offset[i];
     }
     performance_log->log_event("forming new parameter ensemble of mean-shifted prior realizations");
-    ParameterEnsemble new_pe = ParameterEnsemble(&pest_scenario,&rand_gen,anoms,pe_base.get_real_names(),pe.get_var_names());
+    ParameterEnsemble new_pe = ParameterEnsemble(&pest_scenario,&rand_gen,anoms,pebase_real_names,pe.get_var_names());
 
     new_pe.set_trans_status(pe.get_trans_status());
     new_pe.set_fixed_info(pe.get_fixed_info());
@@ -7749,7 +7755,7 @@ void EnsembleMethod::reset_par_ensemble_to_prior_mean(double reinflate_factor,in
     ss << "iteration:" << iter;
     vector<int> temp;
     ofstream& frec = file_manager.rec_ofstream();
-    oe.reserve(oe_base.get_real_names(),oe.get_var_names());
+    oe.reserve(oebase_real_names,oe.get_var_names());
     weights = weights_base;
     for (auto& oname : oe.get_var_names())
     {
