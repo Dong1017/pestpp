@@ -782,108 +782,18 @@ def freyberg_pdc_test():
     pst.pestpp_options["ies_drop_conflicts"] = True
     pst.pestpp_options["ies_autoadaloc"] = True
     pst.control_data.nphinored = 20
-    pst.control_data.noptmax = -1
+    pst.control_data.noptmax = 1
     pst.write(os.path.join(template_d, "pest_base.pst"))
     pyemu.os_utils.start_workers(template_d, exe_path, "pest_base.pst", num_workers=5, master_dir=test_d,
                                  worker_root=model_d, port=port)
-    return
+    
     phi_csv = os.path.join(test_d, "pest_base.phi.actual.csv")
     assert os.path.exists(phi_csv), phi_csv
     pdc_phi = pd.read_csv(phi_csv, index_col=0)
+    print(pdc_phi.shape)
     assert pdc_phi.shape[0] == pst.control_data.noptmax + 1
-    # scan the rec file for the conflicted obs names
-    dropped = []
-    with open(os.path.join(test_d, "pest_base.rec"), 'r') as f:
-        while True:
-            line = f.readline()
-            if line == "":
-                raise Exception()
-            if "...conflicted observations:" in line:
-                while True:
-                    line = f.readline()
-                    if line == "":
-                        raise Exception()
-                    if line.startswith("...dropping"):
-                        break
-                    dropped.append(line.strip().lower())
-                break
-    print(dropped)
-    shutil.copy2(os.path.join(test_d, "pest_base.0.par.csv"), os.path.join(template_d, "pdc_par.csv"))
-    pst.pestpp_options["ies_par_en"] = "pdc_par.csv"
-    shutil.copy2(os.path.join(test_d, "pest_base.obs+noise.csv"), os.path.join(template_d, "pdc_obs.csv"))
-    pst.pestpp_options["ies_obs_en"] = "pdc_obs.csv"
-
-    pst.observation_data.loc[dropped, "weight"] = 0.0
-    pst.pestpp_options["ies_num_reals"] = 10
-    pst.write(os.path.join(template_d, "pest_base.pst"))
-    test_d = os.path.join(model_d, "master_pdc_base")
-    pyemu.os_utils.start_workers(template_d, exe_path, "pest_base.pst", num_workers=5, master_dir=test_d,
-                                 worker_root=model_d, port=port)
-    phi_csv = os.path.join(test_d, "pest_base.phi.actual.csv")
-    assert os.path.exists(phi_csv), phi_csv
-    base_phi = pd.read_csv(phi_csv, index_col=0)
-    assert base_phi.shape[0] == pst.control_data.noptmax + 1
-    diff = (pdc_phi - base_phi).apply(lambda x: np.abs(x))
-    print(diff.max())
-    assert diff.max().max() < 0.1, diff.max().max()
-
-    pst.pestpp_options["ies_pdc_sigma_distance"] = 1.0
-    pst.write(os.path.join(template_d, "pest_pdc_dist.pst"))
-    test_d = os.path.join(model_d, "master_pdc_dist")
-    pyemu.os_utils.start_workers(template_d, exe_path, "pest_pdc_dist.pst", num_workers=5, master_dir=test_d,
-                                 worker_root=model_d, port=port)
-
-    oe = pd.read_csv(os.path.join(test_d, "pest_pdc_dist.0.obs.csv"), index_col=0)
-    oe_base = pd.read_csv(os.path.join(test_d, "pest_pdc_dist.obs+noise.csv"), index_col=0)
-    smn, sstd = oe.mean(), oe.std()
-    omn, ostd = oe_base.mean(), oe_base.std()
-    for name in oe.columns:
-        if name not in pst.nnz_obs_names:
-            continue
-        # print(name,smn[name],sstd[name],omn[name],ostd[name])
-    smin = smn - sstd
-    smax = smn + sstd
-    omin = omn - ostd
-    omax = omn + ostd
-    conflict = []
-    for name, omnn, omx, smnn, smx in zip(oe.columns.values, omin, omax, smin, smax):
-        if name not in pst.nnz_obs_names:
-            continue
-        print(name, smn[name], sstd[name], smnn, smx,
-              omn[name], ostd[name], omnn, omx)
-        if omx < smnn or omnn > smx:
-            conflict.append(name)
-    print(conflict)
-
-    pst.pestpp_options["ies_no_noise"] = True
-    pst.pestpp_options.pop("ies_obs_en")
-    pst.write(os.path.join(template_d, "pest_pdc_dist.pst"))
-    test_d = os.path.join(model_d, "master_pdc_dist")
-    pyemu.os_utils.start_workers(template_d, exe_path, "pest_pdc_dist.pst", num_workers=5, master_dir=test_d,
-                                 worker_root=model_d, port=port)
-
-    oe = pd.read_csv(os.path.join(test_d, "pest_pdc_dist.0.obs.csv"), index_col=0)
-    oe_base = pd.read_csv(os.path.join(test_d, "pest_pdc_dist.obs+noise.csv"), index_col=0)
-    smn, sstd = oe.mean(), oe.std()
-    omn, ostd = oe_base.mean(), oe_base.std()
-    for name in oe.columns:
-        if name not in pst.nnz_obs_names:
-            continue
-        # print(name,smn[name],sstd[name],omn[name],ostd[name])
-    smin = smn - sstd
-    smax = smn + sstd
-    omin = omn - ostd
-    omax = omn + ostd
-    conflict = []
-    for name, omnn, omx, smnn, smx in zip(oe.columns.values, omin, omax, smin, smax):
-        if name not in pst.nnz_obs_names:
-            continue
-        print(name, smn[name], sstd[name], smnn, smx,
-              omn[name], ostd[name], omnn, omx)
-        if omx < smnn or omnn > smx:
-            conflict.append(name)
-    print(conflict)
-
+    
+    
 
 def freyberg_rcov_test():
     import flopy
@@ -4614,7 +4524,7 @@ def tenpar_reinflate_num_reals_invest():
 
     num_reals = 50
     std = 0.25
-    noptmax = 10
+    noptmax = 7
     dialate_factor = 1.25
     par_sigma_range = 6
     obs_bias = 0.0
@@ -4625,18 +4535,21 @@ def tenpar_reinflate_num_reals_invest():
     shutil.copytree(template_d,test_d)
     pst_name = os.path.join(test_d, "pest.pst")
     pst = pyemu.Pst(pst_name)
+
     pst.observation_data["weight"] = 1.0
     pst.observation_data["obsval"] += obs_bias
     pst.parameter_data["partrans"] = "log"
-    pst.parameter_data["parval1"] = pst.parameter_data["parubnd"]
+    pst.parameter_data["parval1"] = pst.parameter_data["parlbnd"]
     #pst.parameter_data.loc[pst.par_names[::2],"parval1"] = pst.parameter_data.loc[pst.par_names[::2],"parubnd"]
-    pst.parameter_data.loc[pst.par_names,"parval1"] = pst.parameter_data.loc[pst.par_names,"parubnd"]
+    #pst.parameter_data.loc[pst.par_names,"parval1"] = pst.parameter_data.loc[pst.par_names,"parubnd"]
     #pst.parameter_data.loc[pst.par_names[1::2],"parval1"] = pst.parameter_data.loc[pst.par_names[1::2],"parlbnd"]
+    #pst.add_pars_as_obs(pst_path=test_d,par_sigma_range=2)
+    #pst.dialate_par_bounds(1.5) 
     pst.control_data.noptmax = noptmax
     pst.pestpp_options["ies_num_reals"] = num_reals
     #pst.pestpp_options["ies_multimodal_alpha"] = 0.99
-    pst.pestpp_options["ies_n_iter_reinflate"] = [8,999]
-    pst.pestpp_options["ies_reinflate_num_reals"] = [10,50]
+    pst.pestpp_options["ies_n_iter_reinflate"] = [6,999] #hard coded below
+    pst.pestpp_options["ies_reinflate_num_reals"] = [10,50] #hard coded below
     pst.pestpp_options["ies_use_approx"] = False
     #pst.pestpp_options["ies_use_mda"] = True
     pst.observation_data["obgnme"] = pst.obs_names
@@ -4655,11 +4568,50 @@ def tenpar_reinflate_num_reals_invest():
     pst.write(os.path.join(pst_name),version=2)
     pyemu.os_utils.run("{0} pest.pst".format(exe_path),cwd=test_d)
     pst = pyemu.Pst(os.path.join(pst_name))
+    pe,oe = pst.ies.paren,pst.ies.obsen
+    for itr in pst.ies.phiactual.iteration:
+        ppe = pe.loc[pe.index.get_level_values(0)==itr]
+        ooe = oe.loc[oe.index.get_level_values(0)==itr]
+        print(itr,ppe.shape,ooe.shape)
+        assert ppe.shape[0] == ooe.shape[0]
+        if int(itr) <= 6:
+            assert ppe.shape[0] == 10
+        else:
+            assert ppe.shape[0] == 50
 
 
+
+def freyberg_reinflate_num_reals_invest():
+    import flopy
+    model_d = "ies_freyberg"
+    test_d = os.path.join(model_d, "master_pdc")
+    template_d = os.path.join(model_d, "template")
+    if os.path.exists(test_d):
+        shutil.rmtree(test_d)
+    # print("loading pst")
+    pst = pyemu.Pst(os.path.join(template_d, "pest.pst"))
+    pst.observation_data.loc[pst.nnz_obs_names[0], "obsval"] += 20
+    pst.pestpp_options = {"ies_num_reals": 5}
+    pst.pestpp_options["ies_lambda_mults"] = 1.0
+    pst.pestpp_options["lambda_scale_fac"] = 1.0
+    pst.pestpp_options["ies_subset_size"] = 10
+    pst.pestpp_options["ies_drop_conflicts"] = True
+    pst.pestpp_options["ies_autoadaloc"] = True
+    pst.control_data.nphinored = 20
+    pst.control_data.noptmax = 1
+    pst.write(os.path.join(template_d, "pest_base.pst"))
+    pyemu.os_utils.start_workers(template_d, exe_path, "pest_base.pst", num_workers=5, master_dir=test_d,
+                                 worker_root=model_d, port=port)
+    
+    phi_csv = os.path.join(test_d, "pest_base.phi.actual.csv")
+    assert os.path.exists(phi_csv), phi_csv
+    pdc_phi = pd.read_csv(phi_csv, index_col=0)
+    print(pdc_phi.shape)
+    assert pdc_phi.shape[0] == pst.control_data.noptmax + 1
     
 
 if __name__ == "__main__":
+    #freyberg_pdc_test()
     tenpar_reinflate_num_reals_invest()
     #tenpar_mean_iter_test_sched()
     #tenpar_uniformdist_invest()

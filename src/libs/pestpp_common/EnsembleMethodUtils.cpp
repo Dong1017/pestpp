@@ -5654,6 +5654,36 @@ void EnsembleMethod::initialize(int cycle, bool run, bool use_existing)
 		pe.keep_rows(pebase_real_names);
 		oe.keep_rows(oebase_real_names);
 
+		ss.str("");
+
+		if (pest_scenario.get_pestpp_options().get_save_dense())
+		{
+			ss << file_manager.get_base_filename();
+			if (cycle != NetPackage::NULL_DA_CYCLE)
+				ss << "." << cycle;
+			ss << ".0.par" << dense_file_ext;
+			pe.to_dense_unordered(ss.str());
+		}
+		else if (pest_scenario.get_pestpp_options().get_save_binary())
+		{
+			ss << file_manager.get_base_filename();
+			if (cycle != NetPackage::NULL_DA_CYCLE)
+				ss << "." << cycle;
+			ss << ".0.par.jcb";
+			pe.to_binary(ss.str());
+		}
+		else
+		{
+			ss << file_manager.get_base_filename();
+			if (cycle != NetPackage::NULL_DA_CYCLE)
+				ss << "." << cycle;
+			ss << ".0.par.csv";
+			pe.to_csv(ss.str());
+		}
+		message(1, "saved initial truncated parameter ensemble to ", ss.str());
+
+
+
 	}
 
 
