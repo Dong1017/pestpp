@@ -2476,8 +2476,9 @@ def tenpar_mean_iter_test_sched():
     shutil.copytree(template_d,test_d)
     pst_name = "pest.pst"
     pst = pyemu.Pst(os.path.join(template_d,pst_name))
-    pst.pestpp_options["ies_n_iter_mean"] = [-1,-2,999]
     pst.pestpp_options = {}
+    
+    pst.pestpp_options["ies_n_iter_mean"] = [-1,-2,999]
     #pst.pestpp_options["ies_reinflate_factor"] = [1.0,0.9,0.8,0.7]
     
     pst.pestpp_options["ies_initial_lambda"] = -100
@@ -2528,6 +2529,8 @@ def tenpar_mean_iter_test_sched():
     shutil.copytree(template_d,test_d)
     pst_name = "pest.pst"
     pst = pyemu.Pst(os.path.join(template_d,pst_name))
+    pst.pestpp_options = {}
+    
     pst.pestpp_options["ies_n_iter_mean"] = [-1,-2,999]
     pst.pestpp_options["ies_reinflate_factor"] = [1.0,0.2,1.0]
     
@@ -4589,10 +4592,10 @@ def freyberg_reinflate_num_reals_invest():
     model_d = "ies_freyberg"
     org_template_d = os.path.join(model_d, "test_template")
 
-    noptmax = 4
-    reinflate = [-3,999]
-    num_reals = 50
-    reinflate_num_reals = [10,50]
+    noptmax = 6
+    reinflate = [-4,999]
+    num_reals = 200
+    reinflate_num_reals = [10,200]
 
     cov = pyemu.Cov.from_binary(os.path.join(org_template_d,"prior.jcb"))
     pst = pyemu.Pst(os.path.join(org_template_d,"pest.pst"))
@@ -4720,7 +4723,7 @@ if __name__ == "__main__":
     #freyberg_pdc_test()
     #tenpar_mean_iter_test()
     #tenpar_reinflate_num_reals_test()
-    freyberg_reinflate_num_reals_invest()
+    #freyberg_reinflate_num_reals_invest()
     tenpar_mean_iter_test_sched()
     #tenpar_uniformdist_invest()
     #temp_plot()
