@@ -4554,8 +4554,8 @@ def tenpar_reinflate_num_reals_test():
     pst.control_data.noptmax = noptmax
     pst.pestpp_options["ies_num_reals"] = num_reals
     #pst.pestpp_options["ies_multimodal_alpha"] = 0.99
-    pst.pestpp_options["ies_n_iter_reinflate"] = [6,999] #hard coded below
-    pst.pestpp_options["ies_reinflate_num_reals"] = [10,50] #hard coded below
+    pst.pestpp_options["ies_n_iter_reinflate"] = [1,4,6,999] #hard coded below
+    pst.pestpp_options["ies_reinflate_num_reals"] = [10,30,50] #hard coded below
     pst.pestpp_options["ies_use_approx"] = False
     #pst.pestpp_options["ies_use_mda"] = True
     pst.observation_data["obgnme"] = pst.obs_names
@@ -4580,8 +4580,10 @@ def tenpar_reinflate_num_reals_test():
         ooe = oe.loc[oe.index.get_level_values(0)==itr]
         print(itr,ppe.shape,ooe.shape)
         assert ppe.shape[0] == ooe.shape[0]
-        if int(itr) <= 6:
+        if int(itr) <= 1:
             assert ppe.shape[0] == 10
+        elif int(itr) <= 6:
+            assert ppe.shape[0] == 30
         else:
             assert ppe.shape[0] == 50
 
@@ -4592,10 +4594,10 @@ def freyberg_reinflate_num_reals_invest():
     model_d = "ies_freyberg"
     org_template_d = os.path.join(model_d, "test_template")
 
-    noptmax = 3
-    reinflate = [-2,999]
-    num_reals = 500
-    reinflate_num_reals = [10,500]
+    noptmax = 5
+    reinflate = [2,999]
+    num_reals = 50
+    reinflate_num_reals = [10,100]
 
     cov = pyemu.Cov.from_binary(os.path.join(org_template_d,"prior.jcb"))
     pst = pyemu.Pst(os.path.join(org_template_d,"pest.pst"))
@@ -4769,11 +4771,11 @@ def compared_freyberg_inflate_runs():
 
 if __name__ == "__main__":
     #freyberg_pdc_test()
-    tenpar_mean_iter_test()
+    #tenpar_mean_iter_test()
     tenpar_reinflate_num_reals_test()
     #freyberg_reinflate_num_reals_invest()
     #compared_freyberg_inflate_runs()
-    tenpar_mean_iter_test_sched()
+    #tenpar_mean_iter_test_sched()
     #tenpar_uniformdist_invest()
     #temp_plot()
     #tenpar_mean_iter_sched_phifac_test()

@@ -1,13 +1,13 @@
 
  <img src="./media/image1.png" style="width:6.26806in;height:1.68194in" alt="A close up of a purple sign Description automatically generated" />
 
-# <a id='s1' />Version 5.2.22
+# <a id='s1' />Version 5.2.24
 
 <img src="./media/image2.png" style="width:6.26806in;height:3.05972in" />
 
 PEST++ Development Team
 
-August 2025
+October 2025
 
 # <a id='s2' />Acknowledgements
 
@@ -3645,6 +3645,8 @@ This option is implemented in PESTPP-IES via the *ies_n_iter_reinflate* option. 
 - There is a related option name *ies_reinflate_factor*, that can be a single floating point number or can be a sequence of floating point numbers ranging from greater than 0.0 to less than or equal to 1.0. The function of *ies_reinflate_factor* is dampen the variability in the prior parameter ensemble anomalies so that the reinflation isn’t to full prior parameter ensemble variance, but instead some scaled down version of that variance.
 
 - During a reinflation cycle, all realizations that have either failed or have been removed for poor performance will be brought back into the current parameter ensemble. If restarting, supplying the previous prior parameter ensemble along with the restart parameter ensemble will enable PESTPP-IES to bring all the prior realizations lost during the previous analysis back into the current ensemble.
+
+- Through the use of *ies_reinflate_num_reals*, which is supplied as a sequence of positive integers, users can adjust the number of realizations used during each reinflation cycle.  For example, a user can supply "10,1000", which results in 10 realizations being used before the first reinflation (including the prior), and them 1000 realizations being used after the first reinflation.  The *ies_reinflate_num_reals* maximum value is limited by the *ies_num_reals* and/or by the number of realizations supplied in an existing parameter ensemble. 
 
 Figure 9.3 shows how the reinflation cycles can mitigate variance collapse for a very simple and contrived example problem. Notice how the realization trajectories collapse after one iteration.
 
