@@ -4769,14 +4769,14 @@ def compared_freyberg_inflate_runs():
 
 if __name__ == "__main__":
     #freyberg_pdc_test()
-    #tenpar_mean_iter_test()
-    #tenpar_reinflate_num_reals_test()
+    tenpar_mean_iter_test()
+    tenpar_reinflate_num_reals_test()
     #freyberg_reinflate_num_reals_invest()
     #compared_freyberg_inflate_runs()
-    #tenpar_mean_iter_test_sched()
+    tenpar_mean_iter_test_sched()
     #tenpar_uniformdist_invest()
     #temp_plot()
-    tenpar_mean_iter_sched_phifac_test()
+    #tenpar_mean_iter_sched_phifac_test()
     #tenpar_consistency_test()
     #freyberg_regfac_invest()
     #freyberg_relaxation_invest()

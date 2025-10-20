@@ -45,7 +45,7 @@ void IterEnsembleSmoother::iterate_2_solution()
     int current_n_iter_reinflate = abs(n_iter_reinflate[n_iter_reinflate_idx]);
     double current_reinflate_factor = reinflate_factor[n_iter_reinflate_idx];
     int current_num_reals = reinflate_num_reals[n_iter_reinflate_idx];
-	if (reinflate_num_reals.size() >= n_iter_reinflate_idx) {
+	if (reinflate_num_reals.size() > n_iter_reinflate_idx+1) {
 		current_num_reals = reinflate_num_reals[n_iter_reinflate_idx+1];
 	}
     int solution_iter = 0;
@@ -109,7 +109,7 @@ void IterEnsembleSmoother::iterate_2_solution()
             if (n_iter_reinflate.size() > n_iter_reinflate_idx) {
 	            current_n_iter_reinflate = abs(n_iter_reinflate[n_iter_reinflate_idx]);
             }
-        	if (reinflate_num_reals.size() >= n_iter_reinflate_idx) {
+        	if (reinflate_num_reals.size() > n_iter_reinflate_idx+1) {
         		current_num_reals = reinflate_num_reals[n_iter_reinflate_idx+1];
         	}
             //now report again to get the new phi sequence after reinflation
