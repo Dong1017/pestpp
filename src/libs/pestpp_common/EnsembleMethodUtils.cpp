@@ -6070,7 +6070,7 @@ void EnsembleMethod::initialize(int cycle, bool run, bool use_existing)
     if (act_obs_names.size() > 0) {
         message(1, "current lambda:", last_best_lam);
     }
-
+	pcs.summarize(pe);
 
     message(0, "initialization complete");
 }
