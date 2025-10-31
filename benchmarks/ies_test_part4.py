@@ -4765,6 +4765,74 @@ def compared_freyberg_inflate_runs():
 
 
 
+def tenpar_reinflate_num_reals_2_test():
+    model_d = "ies_10par_xsec"
+    test_d = os.path.join(model_d, "master_reinflate_num_reals2")
+    template_d = os.path.join(model_d, "test_template")
+
+    if not os.path.exists(template_d):
+        raise Exception("template_d {0} not found".format(template_d))
+
+
+    num_reals = 50
+    std = 0.25
+    noptmax = 7
+    dialate_factor = 1.25
+    par_sigma_range = 6
+    obs_bias = 0.0
+
+
+    if os.path.exists(test_d):
+        shutil.rmtree(test_d)
+    shutil.copytree(template_d,test_d)
+    pst_name = os.path.join(test_d, "pest.pst")
+    pst = pyemu.Pst(pst_name)
+
+    pst.observation_data["weight"] = 1.0
+    pst.observation_data["obsval"] += obs_bias
+    pst.parameter_data["partrans"] = "log"
+    pst.parameter_data["parval1"] = pst.parameter_data["parlbnd"]
+    #pst.parameter_data.loc[pst.par_names[::2],"parval1"] = pst.parameter_data.loc[pst.par_names[::2],"parubnd"]
+    #pst.parameter_data.loc[pst.par_names,"parval1"] = pst.parameter_data.loc[pst.par_names,"parubnd"]
+    #pst.parameter_data.loc[pst.par_names[1::2],"parval1"] = pst.parameter_data.loc[pst.par_names[1::2],"parlbnd"]
+    #pst.add_pars_as_obs(pst_path=test_d,par_sigma_range=2)
+    #pst.dialate_par_bounds(1.5) 
+    pst.control_data.noptmax = noptmax
+    pst.pestpp_options["ies_num_reals"] = num_reals
+    #pst.pestpp_options["ies_multimodal_alpha"] = 0.99
+    pst.pestpp_options["ies_n_iter_reinflate"] = [1,4,6,999] #hard coded below
+    pst.pestpp_options["ies_reinflate_num_reals"] = [-10,-30,-50] #hard coded below
+    pst.pestpp_options["ies_use_approx"] = False
+    #pst.pestpp_options["ies_use_mda"] = True
+    pst.observation_data["obgnme"] = pst.obs_names
+    pst.parameter_data["pargp"] = pst.par_names
+    pst.observation_data.loc[pst.nnz_obs_names,"weight"] = 1./std
+    pst.observation_data["standard_deviation"] = std
+    draws = np.random.normal(0.0,std,num_reals)
+    vals = pst.observation_data.loc[pst.nnz_obs_names,"obsval"].values
+    obsnoise = np.array([vals for _ in range(num_reals)])
+    for i, d in enumerate(draws):
+        obsnoise[i,:] += d
+    noise = pd.DataFrame(obsnoise,columns=pst.nnz_obs_names)
+    noise.to_csv(os.path.join(test_d,"noise.csv"))
+    pst.pestpp_options["ies_obs_en"] = "noise.csv"
+
+    pst.write(os.path.join(pst_name),version=2)
+    pyemu.os_utils.run("{0} pest.pst".format(exe_path),cwd=test_d)
+    pst = pyemu.Pst(os.path.join(pst_name))
+    pe,oe = pst.ies.paren,pst.ies.obsen
+    for itr in pst.ies.phiactual.iteration:
+        ppe = pe.loc[pe.index.get_level_values(0)==itr]
+        ooe = oe.loc[oe.index.get_level_values(0)==itr]
+        print(itr,ppe.shape,ooe.shape)
+        assert ppe.shape[0] == ooe.shape[0]
+        if int(itr) <= 1:
+            assert ppe.shape[0] == 10
+        elif int(itr) <= 6:
+            assert ppe.shape[0] == 30
+        else:
+            assert ppe.shape[0] == 50
+
 
     
 
@@ -4772,7 +4840,7 @@ def compared_freyberg_inflate_runs():
 if __name__ == "__main__":
     #freyberg_pdc_test()
     #tenpar_mean_iter_test()
-    tenpar_reinflate_num_reals_test()
+    tenpar_reinflate_num_reals_2_test()
     #freyberg_reinflate_num_reals_invest()
     #compared_freyberg_inflate_runs()
     #tenpar_mean_iter_test_sched()

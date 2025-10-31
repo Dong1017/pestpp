@@ -5617,7 +5617,7 @@ void EnsembleMethod::initialize(int cycle, bool run, bool use_existing)
     }
 
 	int reinflate_num_reals = pest_scenario.get_pestpp_options().get_ies_reinflate_num_reals()[0];
-	if ((reinflate_num_reals > 0) && (reinflate_num_reals < pe_base.shape().first))
+	if ((abs(reinflate_num_reals) > 0) && (abs(reinflate_num_reals) < pe_base.shape().first))
 	{
 		ss.str("");
 		ss << "'ies_reinflate_num_reals[0] < current ensemble size, truncating ensemble to " << reinflate_num_reals << " realizations";
@@ -5635,7 +5635,7 @@ void EnsembleMethod::initialize(int cycle, bool run, bool use_existing)
 			}
 		}
 		bool found_base = false;
-		for (int i=0;i<reinflate_num_reals;i++)
+		for (int i=0;i<abs(reinflate_num_reals);i++)
 		{
 			tpar.push_back(pebase_real_names[i]);
 			tobs.push_back(oebase_real_names[i]);
@@ -7792,19 +7792,21 @@ void EnsembleMethod::reset_par_ensemble_to_prior_mean(double reinflate_factor,in
 		message(1,"draw new parameter ensemble from current ensemble of size ",abs(reinflate_num_reals));
 		anoms = pe.get_eigen_anomalies();
 		anoms *= 1.0/sqrt(static_cast<double>(anoms.rows()));
-		Eigen::MatrixXd draws(pebase_real_names.size(), anoms.cols());
+		Eigen::MatrixXd draws(anoms.rows(),pebase_real_names.size());
 		draws.setZero();
 		performance_log->log_event("making standard normal draws");
 		//RedSVD::sample_gaussian(draws);
 		for (int i = 0; i < pebase_real_names.size(); i++)
 		{
-			for (int j = 0; j < anoms.cols(); j++)
+			for (int j = 0; j < anoms.rows(); j++)
 			{
-				draws(i, j) = draw_standard_normal(rand_gen);
+				draws(j, i) = draw_standard_normal(rand_gen);
 			}
 		}
-
-		anoms = (anoms * draws.transpose()).transpose();
+		// for (int i=0;i<pebase_real_names.size(); i++) {
+		// 	draws.row(i) = anoms * draws.row(i).transpose();
+		// }
+		anoms = (anoms.transpose() * draws).transpose();
 		draws.resize(0,0);
 		if (abs(reinflate_factor) < 1.0) {
 			performance_log->log_event("adding scaled prior anomalies to new ensemble");
