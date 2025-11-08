@@ -1893,6 +1893,7 @@ void ExternalCtlFile::read_file(ofstream& f_rec)
 		//check for double quotes
 		tokenize(next_line, quote_tokens, "\"", false);
         bool stripped_last = false;
+
         if (quote_tokens[quote_tokens.size()-1].size() == 0)
         {
             quote_tokens.pop_back();
@@ -1904,6 +1905,7 @@ void ExternalCtlFile::read_file(ofstream& f_rec)
 			if ((!stripped_last) && (nqt % 2 == 0))
 				throw_externalctrlfile_error("unbalanced double quotes on line " + org_next_line);
 			tokens.clear();
+        	bool last_empty_with_delim = false;
 			for (int i = 0; i < nqt; i++)
 			{
 				
@@ -1917,8 +1919,10 @@ void ExternalCtlFile::read_file(ofstream& f_rec)
 					tokenize(strip_cp(quote_tokens[i]), temp_tokens, ddelim,false);
 					
 					last_size = quote_tokens[i].size();
-					if (quote_tokens[i].substr(last_size-1,last_size) == ddelim)
+					if (quote_tokens[i].substr(last_size-1,last_size) == ddelim) {
 						temp_tokens.pop_back();
+						last_empty_with_delim = true;
+					}
 					for (auto& t : temp_tokens)
                     {
                         if (t.empty())
@@ -1929,6 +1933,10 @@ void ExternalCtlFile::read_file(ofstream& f_rec)
 				}
 				else if (quote_tokens[i].size() > 0)
 					tokens.push_back(quote_tokens[i]);
+				if (last_empty_with_delim) {
+					tokens.push_back("");
+					last_empty_with_delim = false;
+				}
 
 			}
 
