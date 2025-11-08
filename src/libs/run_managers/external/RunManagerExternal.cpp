@@ -3,7 +3,7 @@
 #include "utilities.h"
 #include "config_os.h"
 #include <system_variables.h>
-#include "model_interface.h"
+#include "network_wrapper.h"
 
 using namespace std;
 
