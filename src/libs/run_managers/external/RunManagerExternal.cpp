@@ -21,6 +21,7 @@ void RunManagerExternal::run()
 {
 
 	std::chrono::system_clock::time_point start_time = chrono::system_clock::now();
+
     cout << pest_utils::get_time_string() << " external run manager calling forward run command(s)" << endl;
 
 #ifdef OS_WIN
@@ -119,6 +120,8 @@ void RunManagerExternal::run()
 #endif
 
 	cout << pest_utils::get_time_string() << " forward run command(s) finished, took " << pest_utils::get_duration_sec(start_time) << " seconds" << endl;
+	//cout << pest_utils::get_time_string() << " re-initializing run storage file";
+	//file_stor.init_restart(file_stor.get_filename());
 
 }
 

@@ -2244,7 +2244,8 @@ for (int i = 0; i < argc; ++i)
     }
 	if ((lower_cmdline_vec.size() == 3) || (lower_cmdline_vec.size() > 4))
 	{
-		throw_cmdline_error("wrong number of args, expecting 2 (serial run mgr) or 4 (parallel run mgr)");
+		if (lower_cmdline_vec[2] != "/e")
+			throw_cmdline_error("wrong number of args, expecting 2 (serial run mgr) or 4 (parallel run mgr)");
 	}
 	
 	//serial run mgr...done
@@ -2276,8 +2277,7 @@ for (int i = 0; i < argc; ++i)
 		throw_cmdline_error("unrecognized commandline arg '" + third_arg + "', expecting '/h','/e','/g'");
 	}
 
-	if (runmanagertype == RunManagerType::PANTHER_WORKER)
-	{
+	if (runmanagertype == RunManagerType::PANTHER_WORKER) {
 		string forth_arg = org_cmdline_vec[3];
 		if (forth_arg.find(":") == string::npos)
 		{
@@ -2318,13 +2318,12 @@ for (int i = 0; i < argc; ++i)
 			cout << "...using panther run manager in worker mode using hostname '" << panther_host_name << "' and port " << panther_port << endl;
 		}
 	}
-	return;
-
 }
  
 
 void CmdLine::throw_cmdline_error(string message)
 {
+	startup_report(cerr,"");
 	cerr << "--------------------------------------------------------" << endl;
 	cerr << "COMMAND LINE ERROR: " << message << endl;
 	cerr << "usage:" << endl << endl;

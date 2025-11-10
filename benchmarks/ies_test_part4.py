@@ -4834,10 +4834,80 @@ def tenpar_reinflate_num_reals_2_test():
             assert ppe.shape[0] == 50
 
 
+def modify_runstor(ws=".",fail_every=None):
+    fname = os.path.join(ws,"pest.rns")
+    header, par_names, obs_names = pyemu.helpers.RunStor.file_info(fname)
+    rs = pyemu.helpers.RunStor(fname)
+    df = rs.get_data()
+    df.loc[:,obs_names] = 123456789.987 #?
+    if fail_every is not None:
+        df.loc[df.index[::fail_every],"run_status"] = -99
+    rs.update(df)
+
+
+def tenpar_ext_run_mgr_test():
+    import inspect
+
+
+    model_d = "ies_10par_xsec"
+    test_d = os.path.join(model_d, "master_ext_run_mgr")
+    template_d = os.path.join(model_d, "test_template")
+
+    if not os.path.exists(template_d):
+        raise Exception("template_d {0} not found".format(template_d))
+
+    if os.path.exists(test_d):
+        shutil.rmtree(test_d)
+    shutil.copytree(template_d,test_d)
     
+    src = inspect.getsource(modify_runstor)
+    src = src.replace(",fail_every=None",",fail_every=1")
+    with open(os.path.join(test_d,"do_the_thing.py"),'w') as f:
+        f.write("import pyemu\nimport os\n")
+        f.write(src)
+        f.write("if __name__ == '__main__':\n")
+        f.write("    modify_runstor()\n")
+
+
+    pst_name = os.path.join(test_d, "pest.pst")
+    pst = pyemu.Pst(pst_name)
+    pst.control_data.noptmax = -1
+    pst.pestpp_options["ies_num_reals"] = 50 #hard coded later
+    pst.model_command = "python do_the_thing.py"
+    pst.write(pst_name,version=2)
+    try:
+        pyemu.os_utils.run("{0} pest.pst /e".format(exe_path),cwd=test_d)
+    except:
+        pass
+    else:
+        raise Exception("should have failed")
+
+    src = inspect.getsource(modify_runstor)
+    with open(os.path.join(test_d,"do_the_thing.py"),'w') as f:
+        f.write("import pyemu\nimport os\n")
+        f.write(src)
+        f.write("if __name__ == '__main__':\n")
+        f.write("    modify_runstor()\n")
+    pyemu.os_utils.run("{0} pest.pst /e".format(exe_path),cwd=test_d)
+    df = pd.read_csv(os.path.join(test_d,"pest.0.obs.csv"),index_col=0)
+    assert np.all(df.values == 123456789.987)
+
+    src = inspect.getsource(modify_runstor)
+    src = src.replace(",fail_every=None",",fail_every=2")
+    with open(os.path.join(test_d,"do_the_thing.py"),'w') as f:
+        f.write("import pyemu\nimport os\n")
+        f.write(src)
+        f.write("if __name__ == '__main__':\n")
+        f.write("    modify_runstor()\n")
+    pyemu.os_utils.run("{0} pest.pst /e".format(exe_path),cwd=test_d)
+    df = pd.read_csv(os.path.join(test_d,"pest.0.obs.csv"),index_col=0)
+    print(df.shape)
+    assert np.all(df.values == 123456789.987)
+    assert df.shape[0] == 25
 
 
 if __name__ == "__main__":
+    tenpar_ext_run_mgr_test()
     #freyberg_pdc_test()
     #tenpar_mean_iter_test()
     #tenpar_reinflate_num_reals_2_test()
@@ -4846,7 +4916,7 @@ if __name__ == "__main__":
     #tenpar_mean_iter_test_sched()
     #tenpar_uniformdist_invest()
     #temp_plot()
-    tenpar_mean_iter_sched_phifac_test()
+    #tenpar_mean_iter_sched_phifac_test()
     #tenpar_consistency_test()
     #freyberg_regfac_invest()
     #freyberg_relaxation_invest()
