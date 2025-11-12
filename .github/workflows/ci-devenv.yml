@@ -21,7 +21,7 @@ jobs:
           - {os: macos-14, shell: bash}
           - {os: ubuntu-latest, shell: bash}
           - {os: ubuntu-22.04, shell: bash}
-          - {os: windows-latest, shell: bash}
+          - {os: windows-2022, shell: bash}
     defaults:
       run:
         shell: ${{ matrix.shell }}
