@@ -3392,8 +3392,7 @@ void ParameterEnsemble::to_csv_by_reals(ofstream &csv, bool write_header)
 		{
 			par_transform.active_ctl2numeric_ip(pars);
 		}
-		else if (tstat == transStatus::MODEL)
-		{
+		else if (tstat == transStatus::MODEL) {
 			par_transform.active_ctl2model_ip(pars);
 		}
 
@@ -3422,9 +3421,16 @@ void ParameterEnsemble::replace_fixed(string real_name,Parameters &pars)
 {
 	
 	map<string, double> rmap = pfinfo.get_real_fixed_values(real_name);
+	double val, offset, scale;
+
 	for (auto& r : rmap)
 	{
-		pars.update_rec(r.first, r.second);
+		val = r.second;
+		scale = pest_scenario_ptr->get_ctl_parameter_info_ptr_4_mod()->get_parameter_rec_ptr(r.first)->scale;
+		offset = pest_scenario_ptr->get_ctl_parameter_info_ptr_4_mod()->get_parameter_rec_ptr(r.first)->offset;
+		val -= offset;
+		val /= scale;
+		pars.update_rec(r.first, val);
 	}
 
 	
@@ -4102,6 +4108,8 @@ map<string, double> FixedParInfo::get_real_fixed_values(const string& rname)
 		return map<string, double>();
 	}
 	map<string, double> rmap;
+	double val;
+
 	for (auto& fi : fixed_info)
 	{
 		if (fi.second.find(rname) == fi.second.end())
