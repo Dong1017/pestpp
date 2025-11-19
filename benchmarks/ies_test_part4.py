@@ -3777,6 +3777,7 @@ def tenpar_consistency_test():
     pst.pestpp_options["ies_no_noise"] = False
     pst.pestpp_options["save_binary"] = True
     pst.pestpp_options["ies_save_lambda_en"] = True
+    pst.pestpp_options["overdue_giveup_fac"] = 10000
 
     par = pst.parameter_data
     par.loc[pst.par_names[0],"partrans"] = "fixed"
