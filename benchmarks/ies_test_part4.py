@@ -3731,12 +3731,10 @@ def tenpar_fixed_restart_test():
     print(diff)
     assert np.abs(diff.values).max() < 1e-6
 
-
     #oe = pd.read_csv(os.path.join(test_d,"restart_obs.csv"),index_col=0)
     oe = pd.read_csv(os.path.join(test_d,"pest1.1.obs.csv"),index_col=0)
     oe.index = [str(i) for i in oe.index]
     r48_ovals = oe.loc["46",pst.obs_names]
-
 
     pst.control_data.noptmax = -2
     pst.pestpp_options.pop("ies_restart_obs_en",None)
@@ -3779,6 +3777,7 @@ def tenpar_consistency_test():
     pst.pestpp_options["ies_no_noise"] = False
     pst.pestpp_options["save_binary"] = True
     pst.pestpp_options["ies_save_lambda_en"] = True
+    pst.pestpp_options["overdue_giveup_fac"] = 10000
 
     par = pst.parameter_data
     par.loc[pst.par_names[0],"partrans"] = "fixed"
@@ -4906,8 +4905,54 @@ def tenpar_ext_run_mgr_test():
     assert df.shape[0] == 25
 
 
+def tenpar_fixed_transform_test():
+    
+
+    model_d = "ies_10par_xsec"
+    test_d = os.path.join(model_d, "master_fixed_transform")
+    template_d = os.path.join(model_d, "test_template")
+
+    if not os.path.exists(template_d):
+        raise Exception("template_d {0} not found".format(template_d))
+
+    if os.path.exists(test_d):
+        shutil.rmtree(test_d)
+    shutil.copytree(template_d,test_d)
+    
+
+    pst_name = os.path.join(test_d, "pest.pst")
+    pst = pyemu.Pst(pst_name)
+    pst.control_data.noptmax = -1
+    pst.pestpp_options["ies_num_reals"] = 50 #hard coded later
+    par = pst.parameter_data
+    par["partrans"] = "none"
+    par.loc[pst.par_names[::2],"partrans"] = "fixed"
+    par.loc[pst.par_names[::2],"offset"] = 5
+
+    pst.write(os.path.join(test_d,"pest.pst"))
+
+    pyemu.os_utils.run("{0} pest.pst".format(exe_path),cwd=test_d)
+    pst = pyemu.Pst(pst_name)
+    pe0 = pst.ies.paren0.copy()
+    shutil.copy2(os.path.join(test_d,"pest.0.par.csv"),os.path.join(test_d,"restart_par.csv"))
+    pst.pestpp_options["ies_par_en"] = "restart_par.csv"
+    pst.write(os.path.join(test_d,"pest_trans.pst"))
+
+    pyemu.os_utils.run("{0} pest_trans.pst".format(exe_path),cwd=test_d)
+    pst = pyemu.Pst(pst_name)
+    pe1 = pst.ies.paren0.copy()
+    assert pe0.shape == pe1.shape
+    diff =  np.abs(pe0.values - pe1.values)
+    print(diff)
+    print(diff.sum())
+    assert diff.sum() < 1e-6
+    
+    
+
 if __name__ == "__main__":
-    tenpar_ext_run_mgr_test()
+    tenpar_fixed_transform_test()
+
+    #tenpar_ext_run_mgr_test()
     #freyberg_pdc_test()
     #tenpar_mean_iter_test()
     #tenpar_reinflate_num_reals_2_test()
