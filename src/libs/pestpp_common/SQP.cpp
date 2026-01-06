@@ -892,7 +892,7 @@ void SeqQuadProgram::initialize()
 	}
 
 
-	message(1, "using the following upgrade vector scale (e.g. 'line search') values:", ppo->get_sqp_scale_facs());
+	//message(1, "using the following upgrade vector scale (e.g. 'line search') values:", ppo->get_sqp_scale_facs());
 	
 	//ofstream &frec = file_manager.rec_ofstream();
 	last_best = 1.0E+30;
@@ -904,7 +904,7 @@ void SeqQuadProgram::initialize()
 	//vector<double> scale_facs = pest_scenario.get_pestpp_options().get_lambda_scale_vec();
 	//message(1, "using scaling factors: ", scale_facs);
 	set<string> passed = ppo->get_passed_args();
-	if (passed.find("SQP_SCALE_FACS") == passed.end())
+	/*if (passed.find("SQP_SCALE_FACS") == passed.end())
 	{
 	    if ((use_ensemble_grad) && (SOLVE_EACH_REAL))
         {
@@ -913,7 +913,7 @@ void SeqQuadProgram::initialize()
 	        message(1,"new sqp_scale_facs",new_scale_facs);
 	        ppo->set_sqp_scale_facs(new_scale_facs);
         };
-	}
+	}*/
 
 	
 	message(1, "max run fail: ", ppo->get_max_run_fail());
@@ -2372,10 +2372,10 @@ bool SeqQuadProgram::solve_new()
 	vector<string> real_names;
     vector<double> scale_vals;
 	scale_vals.clear();
-	for (auto& sf : pest_scenario.get_pestpp_options().get_sqp_scale_facs())
+	/*for (auto& sf : pest_scenario.get_pestpp_options().get_sqp_scale_facs())
     {
 	    scale_vals.push_back(sf * BASE_SCALE_FACTOR);
-    }
+    }*/
 
     if ((use_ensemble_grad) && (SOLVE_EACH_REAL))
     {
