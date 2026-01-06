@@ -2097,7 +2097,7 @@ pair<Eigen::VectorXd, Eigen::VectorXd> SeqQuadProgram::calc_search_direction_vec
 
 	//message(1, "hessian:", hessian);  // tmp
     Mat constraint_mat;
-    if (use_ensemble_grad) {
+    /*if (use_ensemble_grad) {
         message(1, "getting ensemble-based working set constraint matrix");
         constraint_mat = constraints.get_working_set_constraint_matrix(current_ctl_dv_values, current_obs, dv, oe,true);
     }
@@ -2105,7 +2105,7 @@ pair<Eigen::VectorXd, Eigen::VectorXd> SeqQuadProgram::calc_search_direction_vec
     {
         message(2, "getting working set constraint matrix");
         constraint_mat = constraints.get_working_set_constraint_matrix(current_ctl_dv_values, current_obs, jco, true);
-    }
+    }*/
 	//todo:probably need to check if constraint_mat has any nonzeros?
 	vector<string> cnames = constraint_mat.get_row_names();
 
