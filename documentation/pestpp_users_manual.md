@@ -2716,6 +2716,8 @@ Unfortunately, the large computational savings accrued through SVD-assisted inve
 
 A second problem that is associated with SVD-assisted inversion using PEST is that of inconvenience. The SVDAPREP utility must be employed to construct a special PEST input dataset based on super parameters. If re-definition of super parameters is required after a few iterations of an inversion process because of model nonlinearity, then SVDAPREP must be run again.
 
+Note as of PEST++ version 5.2.25, the automated internal SVD-assist functionality in PESTPP-GLM has been removed.  Users who use SVD-Assist are encouraged to use the PEST utilities.
+
 ### <a id='s10-1-7' />6.2.7 Expediting the First Iteration
 
 In the normal course of events, PESTPP-GLM commences an inversion process by running the model in order to determine the value of the objective function based on initial parameter values. In doing this, it also determines the reference values of all model outputs for use in finite difference derivatives calculation. It then commences the long process of filling the Jacobian matrix. As has been explained, this requires at least as many model runs as there are adjustable parameters.
