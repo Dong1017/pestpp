@@ -892,7 +892,7 @@ void SeqQuadProgram::initialize()
 	}
 
 
-	message(1, "using the following upgrade vector scale (e.g. 'line search') values:", ppo->get_sqp_scale_facs());
+	//message(1, "using the following upgrade vector scale (e.g. 'line search') values:", ppo->get_sqp_scale_facs());
 	
 	//ofstream &frec = file_manager.rec_ofstream();
 	last_best = 1.0E+30;
@@ -904,7 +904,7 @@ void SeqQuadProgram::initialize()
 	//vector<double> scale_facs = pest_scenario.get_pestpp_options().get_lambda_scale_vec();
 	//message(1, "using scaling factors: ", scale_facs);
 	set<string> passed = ppo->get_passed_args();
-	if (passed.find("SQP_SCALE_FACS") == passed.end())
+	/*if (passed.find("SQP_SCALE_FACS") == passed.end())
 	{
 	    if ((use_ensemble_grad) && (SOLVE_EACH_REAL))
         {
@@ -913,7 +913,7 @@ void SeqQuadProgram::initialize()
 	        message(1,"new sqp_scale_facs",new_scale_facs);
 	        ppo->set_sqp_scale_facs(new_scale_facs);
         };
-	}
+	}*/
 
 	
 	message(1, "max run fail: ", ppo->get_max_run_fail());
@@ -2097,7 +2097,7 @@ pair<Eigen::VectorXd, Eigen::VectorXd> SeqQuadProgram::calc_search_direction_vec
 
 	//message(1, "hessian:", hessian);  // tmp
     Mat constraint_mat;
-    if (use_ensemble_grad) {
+    /*if (use_ensemble_grad) {
         message(1, "getting ensemble-based working set constraint matrix");
         constraint_mat = constraints.get_working_set_constraint_matrix(current_ctl_dv_values, current_obs, dv, oe,true);
     }
@@ -2105,7 +2105,7 @@ pair<Eigen::VectorXd, Eigen::VectorXd> SeqQuadProgram::calc_search_direction_vec
     {
         message(2, "getting working set constraint matrix");
         constraint_mat = constraints.get_working_set_constraint_matrix(current_ctl_dv_values, current_obs, jco, true);
-    }
+    }*/
 	//todo:probably need to check if constraint_mat has any nonzeros?
 	vector<string> cnames = constraint_mat.get_row_names();
 
@@ -2372,10 +2372,10 @@ bool SeqQuadProgram::solve_new()
 	vector<string> real_names;
     vector<double> scale_vals;
 	scale_vals.clear();
-	for (auto& sf : pest_scenario.get_pestpp_options().get_sqp_scale_facs())
+	/*for (auto& sf : pest_scenario.get_pestpp_options().get_sqp_scale_facs())
     {
 	    scale_vals.push_back(sf * BASE_SCALE_FACTOR);
-    }
+    }*/
 
     if ((use_ensemble_grad) && (SOLVE_EACH_REAL))
     {

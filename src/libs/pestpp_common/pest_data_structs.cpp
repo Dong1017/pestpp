@@ -1721,9 +1721,19 @@ bool PestppOptions::assign_value_by_key_sqp(const string& key, const string& val
 		sqp_obs_restart_en = org_value;
 		return true;
 	}
+	else if (key == "SQP_SEARCH_METHOD")
+	{
+		sqp_search_method = org_value;
+		return true;
+	}
 	else if (key == "SQP_NUM_REALS")
 	{
 		convert_ip(value, sqp_num_reals);
+		return true;
+	}
+	else if (key == "SQP_SUBSET_SIZE")
+	{
+		convert_ip(value, sqp_subset_size);
 		return true;
 	}
 	else if (key == "SQP_UPDATE_HESSIAN")
@@ -1731,22 +1741,132 @@ bool PestppOptions::assign_value_by_key_sqp(const string& key, const string& val
 		sqp_update_hessian = pest_utils::parse_string_arg_to_bool(value);
 		return true;
 	}
-	else if (key == "SQP_SCALE_FACS")
+	else if (key == "SQP_SOLVE_PARTIAL_STEP")
 	{
-		sqp_scale_facs.clear();
+		sqp_solve_partial_step = pest_utils::parse_string_arg_to_bool(value);
+		return true;
+	}
+	else if (key == "SQP_FILTER_TOL")
+	{
+		convert_ip(value, sqp_filter_tol);
+		return true;
+	}
+	else if (key == "SQP_WORKING_SET_TOL")
+	{
+		convert_ip(value, sqp_working_set_tol);
+		return true;
+	}
+	else if (key == "SQP_CMA_REINFLATION_FACTOR")
+	{
+		convert_ip(value, sqp_cma_reinflation_factor);
+		return true;
+	}
+	else if (key == "SQP_ALPHA_MULTS")
+	{
+		sqp_alpha_mults.clear();
 		vector<string> tok;
 		tokenize(value, tok, ",		");
 		double v;
 		for (const auto& t : tok)
 		{
 			convert_ip(t, v);
-			sqp_scale_facs.push_back(v);
+			sqp_alpha_mults.push_back(v);
 		}
 		return true;
 	}
-	
+	else if (key == "SQP_CMA_C1")
+	{
+		convert_ip(value, sqp_cma_c1);
+		return true;
+	}
+	else if (key == "SQP_CMA_CMU")
+	{
+		convert_ip(value, sqp_cma_cmu);
+		return true;
+	}
+	else if (key == "SQP_CMA_CC")
+	{
+		convert_ip(value, sqp_cma_cc);
+		return true;
+	}
+	else if (key == "SQP_CMA_PARENT_NUM")
+	{
+		convert_ip(value, sqp_cma_parent_num);
+		return true;
+	}
+	else if (key == "SQP_CMA_STEPSIZE_CONTROL")
+	{
+		sqp_cma_stepsize_control = pest_utils::parse_string_arg_to_bool(value);
+		return true;
+	}
+	else if (key == "SQP_MAX_CONSEC_INFEAS_IES")
+	{
+		convert_ip(value, sqp_max_consec_infeas_ies);
+		return true;
+	}
+	else if (key == "SQP_MAX_REINFLATION_COND_NUM")
+	{
+		convert_ip(value, sqp_max_reinflation_cond_num);
+		return true;
+	}
+	else if (key == "SQP_SCALE_UP_FACTOR")
+	{
+		convert_ip(value, sqp_scale_up_factor);
+		return true;
+	}
+	else if (key == "SQP_SCALE_DOWN_FACTOR")
+	{
+		convert_ip(value, sqp_scale_down_factor);
+		return true;
+	}
+	else if (key == "SQP_HESS_MAX_COND_NUM")
+	{
+		convert_ip(value, sqp_hess_max_cond_num);
+		return true;
+	}
+	else if (key == "SQP_SAVE_COV_EVERY")
+	{
+		convert_ip(value, sqp_save_cov_every);
+		return true;
+	}
+	else if (key == "SQP_ENFORCE_BOUNDS")
+	{
+		sqp_enforce_bounds = pest_utils::parse_string_arg_to_bool(value);
+		return true;
+	}
+	else if (key == "SQP_VIOL_PAD")
+	{
+		convert_ip(value, sqp_viol_pad);
+		return true;
+	}
+	else if (key == "SQP_RESET_HESSIAN_EVERY")
+	{
+		convert_ip(value, sqp_reset_hessian_every);
+		return true;
+	}
+	else if (key == "SQP_WSET_LEVEL")
+	{
+		convert_ip(value, sqp_wset_level);
+		return true;
+	}
+	else if (key == "SQP_RESCALE_SEARCH_DIR")
+	{
+		sqp_rescale_search_dir = pest_utils::parse_string_arg_to_bool(value);
+		return true;
+	}
+	else if (key == "SQP_SEEK_FEAS_MAX_ITER")
+	{
+		convert_ip(value, sqp_seek_feas_max_iter);
+		return true;
+	}
+	else if (key == "SQP_RISK")
+	{
+		convert_ip(value, sqp_risk);
+		return true;
+	}
 	return false;
 }
+
 
 void PestppOptions::summary(ostream& os) const
 {
@@ -1906,11 +2026,36 @@ void PestppOptions::summary(ostream& os) const
 	os << endl << "...pestpp-sqp options:" << endl;
 	os << "sqp_dv_en: " << sqp_dv_en << endl;
 	os << "sqp_obs_restart_en: " << sqp_obs_restart_en << endl;
+	os << "sqp_search_method: " << sqp_search_method << endl;
 	os << "sqp_num_reals: " << sqp_num_reals << endl;
+	os << "sqp_subset_size: " << sqp_subset_size << endl;
 	os << "sqp_update_hessian: " << sqp_update_hessian << endl;
-	os << "sqp_scale_facs:" << endl;
-	for (auto m : sqp_scale_facs)
+	os << "sqp_hessian_update_method: " << sqp_hessian_update_method << endl;
+	os << "sqp_solve_partial_step: " << sqp_solve_partial_step << endl;
+	os << "sqp_alpha_mults:" << endl;
+	for (auto m : sqp_alpha_mults)
 		os << "  " << m << endl;
+	os << "sqp_filter_tol: " << sqp_filter_tol << endl;
+	os << "sqp_working_set_tol: " << sqp_working_set_tol << endl;
+	os << "sqp_cma_c1: " << sqp_cma_c1 << endl;
+	os << "sqp_cma_cmu: " << sqp_cma_cmu << endl;
+	os << "sqp_cma_cc: " << sqp_cma_cc << endl;
+	os << "sqp_cma_parent_num: " << sqp_cma_parent_num << endl;
+	os << "sqp_cma_stepsize_control: " << sqp_cma_stepsize_control << endl;
+	os << "sqp_cma_reinflation_factor: " << sqp_cma_reinflation_factor << endl;
+	os << "sqp_max_consec_infeas_ies: " << sqp_max_consec_infeas_ies << endl;
+	os << "sqp_max_reinflation_cond_num: " << sqp_max_reinflation_cond_num << endl;
+	os << "sqp_scale_up_factor: " << sqp_scale_up_factor << endl;
+	os << "sqp_scale_down_factor: " << sqp_scale_down_factor << endl;
+	os << "sqp_hess_max_cond_num: " << sqp_hess_max_cond_num << endl;
+	os << "sqp_save_cov_every: " << sqp_save_cov_every << endl;
+	os << "sqp_enforce_bounds: " << sqp_enforce_bounds << endl;
+	os << "sqp_viol_pad: " << sqp_viol_pad << endl;
+	os << "sqp_reset_hessian_every: " << sqp_reset_hessian_every << endl;
+	os << "sqp_wset_level: " << sqp_wset_level << endl;
+	os << "sqp_rescale_search_dir: " << sqp_rescale_search_dir << endl;
+	os << "sqp_seek_feas_max_iter: " << sqp_seek_feas_max_iter << endl;
+	os << "sqp_risk: " << sqp_risk << endl;
 
 	os << endl << "...pestpp-mou options:" << endl;
 	os << "mou_generator: " << mou_generator << endl;
@@ -2141,9 +2286,34 @@ void PestppOptions::set_defaults()
 
 	set_sqp_dv_en("");
 	set_sqp_obs_restart_en("");
+	set_sqp_search_method("LINE");
 	set_sqp_num_reals(-1);
-	set_sqp_update_hessian(false);
-	set_sqp_scale_facs(vector<double>{0.00001, 0.0001,0.0005, 0.001, 0.0025, 0.005, 0.01, 0.05, 0.075, 0.1, 0.25,0.5, 1.0,2.,5.,10.,});
+	set_sqp_subset_size(-10);
+	set_sqp_update_hessian(true);
+	set_sqp_hessian_update_method("BFGS");
+	set_sqp_solve_partial_step(true);
+	set_sqp_alpha_mults(vector<double>{0.001, 0.005, 0.01, 0.1, 0.5, 1.0});
+	set_sqp_filter_tol(0.001);
+	set_sqp_working_set_tol(0.10);
+	set_sqp_cma_c1(-1);
+	set_sqp_cma_cmu(-1);
+	set_sqp_cma_cc(-1);
+	set_sqp_cma_parent_num(-1);
+	set_sqp_cma_stepsize_control(false);
+	set_sqp_cma_reinflation_factor(-1.0);
+	set_sqp_max_consec_infeas_ies(3);
+	set_sqp_max_reinflation_cond_num(500.0);
+	set_sqp_scale_up_factor(1.0);
+	set_sqp_scale_down_factor(1.0);
+	set_sqp_hess_max_cond_num(1E+5);
+	set_sqp_save_cov_every(-1);
+	set_sqp_enforce_bounds(false);
+	set_sqp_viol_pad(1E-4);
+	set_sqp_reset_hessian_every(-1);
+	set_sqp_wset_level(1);
+	set_sqp_rescale_search_dir(true);
+	set_sqp_seek_feas_max_iter(3);
+	set_sqp_risk(0.50);
 
 	set_mou_generator("PSO");
 	set_mou_population_size(100);
@@ -2236,7 +2406,7 @@ void PestppOptions::set_defaults()
 	set_ies_loc_type("LOCAL");
 	set_ies_upgrades_in_memory(true);
 	set_ies_ordered_binary(true);
-    set_ies_multimodal_alpha(1.0);
+    set_ies_multimodal_alpha(0.0);
     set_ensemble_output_precision(20);
     set_ies_localizer_forgive_missing(false);
     set_ies_phi_fractions_files("");
